@@ -1,57 +1,51 @@
-import logging
+import telebot
 
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+CHAVE_API = "1975140622:AAE_2oQ6wuiRX78NT-q4tylH4Ne6y4NW1K4"
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
+bot = telebot.TeleBot(CHAVE_API)
 
-logger = logging.getLogger(__name__)
+@bot.message_handler(commands=["pizza"])
+def pizza(mensagem):
+    bot.send_message(mensagem.chat.id, "Saindo a pizza pra sua casa: Tempo de espera em 20min")
 
-def start(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /start is issued."""
-    user = update.effective_user
-    update.message.reply_markdown_v2(
-        fr'Hi {user.mention_markdown_v2()}\!',
-        reply_markup=ForceReply(selective=True),
-    )
+@bot.message_handler(commands=["hamburguer"])
+def hamburguer(mensagem):
+    bot.send_message(mensagem.chat.id, "Saindo o Brabo: em 10min chega ai")
 
+@bot.message_handler(commands=["salada"])
+def salada(mensagem):
+    bot.send_message(mensagem.chat.id, "Não tem salada não, clique aqui para iniciar: /iniciar")
 
-def help_command(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+@bot.message_handler(commands=["opcao1"])
+def opcao1(mensagem):
+    texto = """
+    O que você quer? (Clique em uma opção)
+    /pizza Pizza
+    /hamburguer Hamburguer
+    /salada Salada"""
+    bot.send_message(mensagem.chat.id, texto)
 
+@bot.message_handler(commands=["opcao2"])
+def opcao2(mensagem):
+    bot.send_message(mensagem.chat.id, "Para enviar uma reclamação, mande um e-mail para reclamação@balbalba.com")
 
-def echo(update: Update, context: CallbackContext) -> None:
-    """Echo the user message."""
-    update.message.reply_text(update.message.text)
-
-
-def main() -> None:
-    """Start the bot."""
-    # Create the Updater and pass it your bot's token.
-    updater = Updater("1975140622:AAE_2oQ6wuiRX78NT-q4tylH4Ne6y4NW1K4")
-
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
-
-    # on different commands - answer in Telegram
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help_command))
-
-    # on non command i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-
-    # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+@bot.message_handler(commands=["opcao3"])
+def opcao3(mensagem):
+    bot.send_message(mensagem.chat.id, "Valeu! Lira mandou um abraço de volta")
 
 
-if __name__ == '__main__':
-    main()
 
+def verificar(mensagem):
+    return True
+
+@bot.message_handler(func=verificar)
+def responder(mensagem):
+    texto = """
+    Escolha uma opção para continuar (Clique no item):
+     /opcao1 Fazer um pedido
+     /opcao2 Reclamar de um pedido
+     /opcao3 Mandar um abraço pro Lira
+Responder qualquer outra coisa não vai funcionar, clique em uma das opções"""
+    bot.reply_to(mensagem, texto)
+
+bot.polling()
